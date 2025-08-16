@@ -79,28 +79,50 @@ export default async function handler(
         return res.status(400).json({ error: 'Withdrawal rate must be between 0% and 10%' })
       }
 
-      // Upsert baseline settings (singleton)
-      const { data, error } = await supabase
+      // Check if baseline settings already exist
+      const { data: existingSettings } = await supabase
         .from('baseline_settings')
-        .upsert({
-          person1_name: person1_name.trim(),
-          person1_current_balance: Number(person1_current_balance) || 0,
-          person1_annual_contribution: Number(person1_annual_contribution) || 0,
-          person1_age: Number(person1_age),
-          person2_name: person2_name.trim(),
-          person2_current_balance: Number(person2_current_balance) || 0,
-          person2_annual_contribution: Number(person2_annual_contribution) || 0,
-          person2_age: Number(person2_age),
-          expected_return_mean: Number(expected_return_mean),
-          expected_return_volatility: Number(expected_return_volatility),
-          safe_withdrawal_rate: Number(safe_withdrawal_rate),
-          inflation_rate: Number(inflation_rate) || 2.5,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
-        })
-        .select()
+        .select('id')
         .single()
+
+      const settingsData = {
+        person1_name: person1_name.trim(),
+        person1_current_balance: Number(person1_current_balance) || 0,
+        person1_annual_contribution: Number(person1_annual_contribution) || 0,
+        person1_age: Number(person1_age),
+        person2_name: person2_name.trim(),
+        person2_current_balance: Number(person2_current_balance) || 0,
+        person2_annual_contribution: Number(person2_annual_contribution) || 0,
+        person2_age: Number(person2_age),
+        expected_return_mean: Number(expected_return_mean),
+        expected_return_volatility: Number(expected_return_volatility),
+        safe_withdrawal_rate: Number(safe_withdrawal_rate),
+        inflation_rate: Number(inflation_rate) || 2.5,
+        updated_at: new Date().toISOString()
+      }
+
+      let data, error
+
+      if (existingSettings) {
+        // Update existing record
+        const result = await supabase
+          .from('baseline_settings')
+          .update(settingsData)
+          .eq('id', existingSettings.id)
+          .select()
+          .single()
+        data = result.data
+        error = result.error
+      } else {
+        // Insert new record
+        const result = await supabase
+          .from('baseline_settings')
+          .insert(settingsData)
+          .select()
+          .single()
+        data = result.data
+        error = result.error
+      }
 
       if (error) {
         console.error('Database error:', error)

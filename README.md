@@ -247,6 +247,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Healthcare**: Medicare vs private health considerations
 - **Age Pension**: Means testing and integration strategies
 
+## 🔧 Recent Fixes
+
+### Input Precision
+- **Fixed**: Changed input step values from 1000 to 1 for precise dollar amounts
+- **Impact**: Can now enter exact super balances including cents (e.g., $116,289.50)
+
+### Baseline Settings Save
+- **Fixed**: Singleton database constraint handling in upsert operations
+- **Impact**: Baseline settings now save properly without constraint violations
+
+### Inheritance Events Persistence
+- **Fixed**: PUT method now properly handles lumpsum_events updates
+- **Impact**: Inheritance events persist correctly when editing scenarios
+
+### Validation Ranges
+- **Ages**: 18-100 years
+- **Expected Return**: 0-20% per year
+- **Volatility**: 0-50% per year
+- **Withdrawal Rate**: 0.1-10% per year
+
 ## 📞 Support
 
 For questions or support, please:

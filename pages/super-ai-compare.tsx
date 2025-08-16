@@ -110,7 +110,7 @@ export default function SuperAICompare() {
                 <input
                   type="number"
                   min="10000"
-                  step="10000"
+                  step="1"
                   value={formData.inheritance_amount}
                   onChange={(e) => setFormData(prev => ({ ...prev, inheritance_amount: Number(e.target.value) }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -149,7 +149,7 @@ export default function SuperAICompare() {
                   <input
                     type="number"
                     min="30000"
-                    step="5000"
+                    step="1"
                     value={formData.target_value}
                     onChange={(e) => setFormData(prev => ({ ...prev, target_value: Number(e.target.value) }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -58,6 +58,9 @@ super-planner/
 - [x] **Australian super compliance** (preservation age, etc.)
 - [x] **Comprehensive API validation** and error handling
 - [x] **TypeScript coverage** throughout application
+- [x] **Singleton baseline settings** with proper upsert handling
+- [x] **Precise input validation** (dollar amounts with cents)
+- [x] **Inheritance events persistence** fix for scenario updates
 
 ### 🎯 Project Metrics
 - **8 pages** in focused Super Planner application
@@ -154,6 +157,14 @@ The application was comprehensively refactored from a general FIRE planner to a 
 - **UI/UX**: Created 4 focused pages for baseline → scenarios → projections → AI comparison
 - **APIs**: Developed 4 robust endpoints with validation and caching
 - **Features Removed**: Household income tracking, emergency funds, property analysis, Up Bank integration
+
+### Recent Bug Fixes (2025-08-16)
+Post-refactoring bug fixes for production stability:
+
+- **Baseline Settings Singleton**: Fixed upsert handling for singleton database constraint
+- **Input Precision**: Changed step="1000" to step="1" for precise dollar amount entry
+- **Inheritance Events Persistence**: Fixed PUT method to properly handle lumpsum_events updates
+- **Validation Constraints**: Ensured proper range validation (ages 18-100, returns 0-20%, etc.)
 
 ### Architecture Decisions
 - **Monte Carlo simulations** chosen for realistic retirement projections with market volatility

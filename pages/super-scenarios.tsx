@@ -280,7 +280,7 @@ export default function SuperScenarios() {
                   <input
                     type="number"
                     min="10000"
-                    step="5000"
+                    step="1"
                     value={formData.target_annual_income}
                     onChange={(e) => setFormData(prev => ({ ...prev, target_annual_income: Number(e.target.value) }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -333,7 +333,7 @@ export default function SuperScenarios() {
                         <input
                           type="number"
                           min="1000"
-                          step="10000"
+                          step="1"
                           value={event.amount}
                           onChange={(e) => updateLumpsumEvent(index, 'amount', Number(e.target.value))}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"

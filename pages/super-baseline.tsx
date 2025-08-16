@@ -205,7 +205,7 @@ export default function SuperBaseline() {
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="1"
                   value={settings.person1_current_balance}
                   onChange={(e) => handleInputChange('person1_current_balance', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -218,7 +218,7 @@ export default function SuperBaseline() {
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="1"
                   value={settings.person1_annual_contribution}
                   onChange={(e) => handleInputChange('person1_annual_contribution', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -263,7 +263,7 @@ export default function SuperBaseline() {
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="1"
                   value={settings.person2_current_balance}
                   onChange={(e) => handleInputChange('person2_current_balance', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -276,7 +276,7 @@ export default function SuperBaseline() {
                 <input
                   type="number"
                   min="0"
-                  step="1000"
+                  step="1"
                   value={settings.person2_annual_contribution}
                   onChange={(e) => handleInputChange('person2_annual_contribution', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
