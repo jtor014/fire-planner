@@ -11,7 +11,26 @@
       "Bash(git add:*)",
       "Bash(git config:*)",
       "Bash(gh auth:*)",
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(./verify-workspace.sh:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run test:api:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:paycalculator.com.au)",
+      "WebFetch(domain:payc.com.au)",
+      "Bash(psql:*)",
+      "Bash(npm install:*)",
+      "Bash(supabase:*)",
+      "Bash(export SUPABASE_DB_PASSWORD=\"gRY0pSo0N4RXmsP5\")",
+      "Bash(./test-direct-connection.sh:*)",
+      "Bash(export PROJECT_REF=\"jbxwxltzrpifwijvkfgi\")",
+      "Bash(export DB_PASSWORD=\"gRY0pSo0N4RXmsP5\")",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(awk:*)"
     ],
     "defaultMode": "acceptEdits"
   }

@@ -12,6 +12,9 @@
     "db:migrate": "node database/migrate.js",
     "db:migrate:manual": "node database/migrate.js --manual",
     "db:sample": "echo 'Run database/sample_data.sql in Supabase SQL Editor'",
+    "db:push": "node supabase-cli-wrapper.js db push",
+    "db:reset": "node supabase-cli-wrapper.js db reset",
+    "db:status": "node supabase-cli-wrapper.js db status",
     "setup": "npm install && npm run db:migrate:manual"
   },
   "dependencies": {
