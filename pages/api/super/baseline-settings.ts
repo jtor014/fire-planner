@@ -79,6 +79,7 @@ export default async function handler(
         return res.status(400).json({ error: 'Withdrawal rate must be between 0% and 10%' })
       }
 
+
       // Check if baseline settings already exist
       const { data: existingSettings } = await supabase
         .from('baseline_settings')

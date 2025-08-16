@@ -94,8 +94,8 @@ export default function SuperBaseline() {
     }))
   }
 
-  const totalCurrentBalance = settings.person1_current_balance + settings.person2_current_balance
-  const totalAnnualContributions = settings.person1_annual_contribution + settings.person2_annual_contribution
+  const totalCurrentBalance = Number(settings.person1_current_balance) + Number(settings.person2_current_balance)
+  const totalAnnualContributions = Number(settings.person1_annual_contribution) + Number(settings.person2_annual_contribution)
   const retirementYearPerson1 = new Date().getFullYear() + (67 - settings.person1_age)
   const retirementYearPerson2 = new Date().getFullYear() + (67 - settings.person2_age)
 
@@ -160,12 +160,13 @@ export default function SuperBaseline() {
             </div>
             
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">Preservation Ages</h3>
+              <h3 className="text-sm font-medium text-gray-600 mb-2">Super Access Ages</h3>
               <div className="text-lg font-bold text-gray-900">
-                {retirementYearPerson1} / {retirementYearPerson2}
+                {new Date().getFullYear() + (60 - settings.person1_age)} / {new Date().getFullYear() + (60 - settings.person2_age)}
               </div>
               <div className="text-sm text-gray-500">
-                67th birthday years
+                {settings.person1_name}: age 60 in {new Date().getFullYear() + (60 - settings.person1_age)}<br/>
+                {settings.person2_name}: age 60 in {new Date().getFullYear() + (60 - settings.person2_age)}
               </div>
             </div>
           </div>

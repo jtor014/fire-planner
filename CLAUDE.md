@@ -61,6 +61,12 @@ super-planner/
 - [x] **Singleton baseline settings** with proper upsert handling
 - [x] **Precise input validation** (dollar amounts with cents)
 - [x] **Inheritance events persistence** fix for scenario updates
+- [x] **🆕 Dual retirement strategy system** with 4 comprehensive options
+- [x] **🆕 Retirement vs super access distinction** with clear terminology
+- [x] **🆕 Smart super contribution handling** (stops when retiring)
+- [x] **🆕 Inheritance bridge strategy** (use lump sums as living expenses)
+- [x] **🆕 Enhanced scenario edit UX** (forms expand underneath scenarios)
+- [x] **🆕 Combined balance display fix** (proper numerical addition)
 
 ### 🎯 Project Metrics
 - **8 pages** in focused Super Planner application
@@ -158,9 +164,19 @@ The application was comprehensively refactored from a general FIRE planner to a 
 - **APIs**: Developed 4 robust endpoints with validation and caching
 - **Features Removed**: Household income tracking, emergency funds, property analysis, Up Bank integration
 
-### Recent Bug Fixes (2025-08-16)
-Post-refactoring bug fixes for production stability:
+### Recent Features & Fixes (2025-08-16)
+Major features and bug fixes for enhanced retirement planning:
 
+#### 🆕 Dual Retirement Strategy System
+- **Four comprehensive strategies**: wait_for_both, early_retirement_first, bridge_strategy, inheritance_bridge
+- **Retirement vs super access distinction**: Clear separation between stopping work and accessing super at 60
+- **Smart contribution handling**: Super contributions stop when retiring, not just at preservation age
+- **Inheritance bridge strategy**: Use lump sums as living expenses instead of super contributions
+- **Timeline visualization**: Shows when each person reaches preservation age vs when retirement is possible
+
+#### Bug Fixes & UX Improvements
+- **Combined Balance Display**: Fixed calculation showing $212,000 instead of $11600096000 (string concatenation bug)
+- **Scenario Edit UX**: Forms now expand underneath each scenario instead of at top of page
 - **Baseline Settings Singleton**: Fixed upsert handling for singleton database constraint
 - **Input Precision**: Changed step="1000" to step="1" for precise dollar amount entry
 - **Inheritance Events Persistence**: Fixed PUT method to properly handle lumpsum_events updates

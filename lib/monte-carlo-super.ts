@@ -28,6 +28,8 @@ export interface SuperScenario {
   target_retirement_date?: string
   monte_carlo_runs: number
   lumpsum_events: LumpsumEvent[]
+  retirement_strategy: 'wait_for_both' | 'early_retirement_first' | 'bridge_strategy' | 'inheritance_bridge'
+  bridge_years_other_income: number
 }
 
 export interface SimulationResult {
@@ -84,6 +86,117 @@ function calculateAccessibleBalance(balance: number, age: number): number {
   return balance
 }
 
+// Determine if someone has retired (stopped working) based on strategy and sustainable income
+function hasRetired(
+  person1_balance: number, 
+  person1_age: number,
+  person2_balance: number, 
+  person2_age: number,
+  baseline: BaselineSettings,
+  scenario: SuperScenario,
+  currentYear: number,
+  targetIncome: number
+): boolean {
+  const person1CanAccess = person1_age >= 60
+  const person2CanAccess = person2_age >= 60
+  
+  switch (baseline.retirement_strategy) {
+    case 'wait_for_both':
+      // Only retire when both can access super and target income is met
+      if (person1CanAccess && person2CanAccess) {
+        const accessibleTotal = calculateAccessibleBalance(person1_balance, person1_age) + calculateAccessibleBalance(person2_balance, person2_age)
+        const sustainableIncome = accessibleTotal * (baseline.safe_withdrawal_rate / 100)
+        return sustainableIncome >= targetIncome
+      }
+      return false
+      
+    case 'early_retirement_first':
+      // Retire when first person can access and target income is met with higher withdrawal
+      if (person1CanAccess || person2CanAccess) {
+        const accessibleTotal = calculateAccessibleBalance(person1_balance, person1_age) + calculateAccessibleBalance(person2_balance, person2_age)
+        const withdrawalRate = (person1CanAccess && person2CanAccess) ? baseline.safe_withdrawal_rate : baseline.early_retirement_withdrawal_rate
+        const sustainableIncome = accessibleTotal * (withdrawalRate / 100)
+        return sustainableIncome >= targetIncome
+      }
+      return false
+      
+    case 'bridge_strategy':
+      // Can retire earlier using bridge income
+      const accessibleTotal = calculateAccessibleBalance(person1_balance, person1_age) + calculateAccessibleBalance(person2_balance, person2_age)
+      const superIncome = accessibleTotal * (baseline.safe_withdrawal_rate / 100)
+      const totalIncome = superIncome + baseline.bridge_years_other_income
+      return totalIncome >= targetIncome
+      
+    case 'inheritance_bridge':
+      // Can retire using inheritance as living expenses (determined by scenario events)
+      // This will be handled separately in the simulation loop
+      return false
+      
+    default:
+      return false
+  }
+}
+
+// Calculate sustainable income based on retirement strategy
+function calculateSustainableIncome(
+  person1_balance: number, 
+  person1_age: number,
+  person2_balance: number, 
+  person2_age: number,
+  baseline: BaselineSettings,
+  scenario: SuperScenario,
+  currentYear: number,
+  inheritanceAvailable: number = 0 // Track remaining inheritance for living expenses
+): number {
+  const accessible1 = calculateAccessibleBalance(person1_balance, person1_age)
+  const accessible2 = calculateAccessibleBalance(person2_balance, person2_age)
+  
+  const person1CanAccess = person1_age >= 60
+  const person2CanAccess = person2_age >= 60
+  
+  switch (scenario.retirement_strategy) {
+    case 'wait_for_both':
+      // Traditional approach: wait until both can access super
+      if (person1CanAccess && person2CanAccess) {
+        return (accessible1 + accessible2) * (baseline.safe_withdrawal_rate / 100)
+      }
+      return 0
+      
+    case 'early_retirement_first':
+      // Allow retirement when first person reaches 60 - simulation will determine if target income is achievable
+      if (person1CanAccess || person2CanAccess) {
+        const accessibleTotal = accessible1 + accessible2
+        // Use the safe withdrawal rate - simulation will determine if this meets target income
+        return accessibleTotal * (baseline.safe_withdrawal_rate / 100)
+      }
+      return 0
+      
+    case 'bridge_strategy':
+      // Use bridge income until both can access, then normal withdrawal
+      if (person1CanAccess && person2CanAccess) {
+        // Both can access - normal withdrawal + any ongoing bridge income
+        return (accessible1 + accessible2) * (baseline.safe_withdrawal_rate / 100) + scenario.bridge_years_other_income
+      } else if (person1CanAccess || person2CanAccess) {
+        // One can access - accessible super + bridge income
+        const accessibleTotal = accessible1 + accessible2
+        return accessibleTotal * (baseline.safe_withdrawal_rate / 100) + scenario.bridge_years_other_income
+      } else {
+        // Neither can access - only bridge income
+        return scenario.bridge_years_other_income
+      }
+      
+    case 'inheritance_bridge':
+      // Use inheritance for living expenses plus any accessible super
+      const superIncome = (accessible1 + accessible2) * (baseline.safe_withdrawal_rate / 100)
+      // Assume inheritance provides annual income (inheritance / years to stretch it)
+      const inheritanceIncome = inheritanceAvailable > 0 ? Math.min(inheritanceAvailable, 80000) : 0 // Cap at reasonable annual amount
+      return superIncome + inheritanceIncome
+      
+    default:
+      return 0
+  }
+}
+
 // Run a single Monte Carlo simulation path
 function runSingleSimulation(
   baseline: BaselineSettings,
@@ -114,25 +227,34 @@ function runSingleSimulation(
   const yearly_data = []
   let retirement_year: number | undefined
   let final_income: number | undefined
+  let hasRetiredAlready = false
+  let inheritanceRemaining = 0
 
   // Process each year
   for (let year = currentYear; year <= currentYear + maxProjectionYears; year++) {
-    // Apply annual contributions (assuming they stop at age 67)
-    if (person1_age < 67) {
+    // Apply annual contributions (stop at age 67 OR when retired)
+    if (person1_age < 67 && !hasRetiredAlready) {
       person1_balance += baseline.person1_annual_contribution
     }
-    if (person2_age < 67) {
+    if (person2_age < 67 && !hasRetiredAlready) {
       person2_balance += baseline.person2_annual_contribution
     }
 
     // Apply lump sum events
     scenario.lumpsum_events.forEach(event => {
       const eventYear = new Date(event.event_date).getFullYear()
-      if (year === eventYear && event.allocation_strategy === 'super') {
-        const person1_amount = (event.amount * event.person1_split) / 100
-        const person2_amount = (event.amount * event.person2_split) / 100
-        person1_balance += person1_amount
-        person2_balance += person2_amount
+      if (year === eventYear) {
+        if (scenario.retirement_strategy === 'inheritance_bridge' && event.allocation_strategy === 'super') {
+          // For inheritance bridge strategy, use super contributions as living expenses instead
+          inheritanceRemaining += event.amount
+        } else if (event.allocation_strategy === 'super') {
+          // Normal super contribution
+          const person1_amount = (event.amount * event.person1_split) / 100
+          const person2_amount = (event.amount * event.person2_split) / 100
+          person1_balance += person1_amount
+          person2_balance += person2_amount
+        }
+        // Note: other allocation strategies (mortgage_payoff, taxable_investment) would be handled here
       }
     })
 
@@ -144,13 +266,23 @@ function runSingleSimulation(
     person1_balance *= (1 + return1)
     person2_balance *= (1 + return2)
 
-    // Calculate accessible balances
-    const accessible1 = calculateAccessibleBalance(person1_balance, person1_age)
-    const accessible2 = calculateAccessibleBalance(person2_balance, person2_age)
-    const combined_accessible = accessible1 + accessible2
+    // Use inheritance for living expenses if using inheritance bridge strategy
+    if (scenario.retirement_strategy === 'inheritance_bridge' && inheritanceRemaining > 0) {
+      const annualLivingExpenses = Math.min(inheritanceRemaining, 80000) // Cap at reasonable amount
+      inheritanceRemaining = Math.max(0, inheritanceRemaining - annualLivingExpenses)
+    }
     
-    // Calculate sustainable income
-    const sustainable_income = combined_accessible * (baseline.safe_withdrawal_rate / 100)
+    // Calculate sustainable income using retirement strategy
+    const sustainable_income = calculateSustainableIncome(
+      person1_balance, 
+      person1_age,
+      person2_balance, 
+      person2_age,
+      baseline,
+      scenario,
+      year,
+      inheritanceRemaining
+    )
 
     yearly_data.push({
       year,
@@ -168,10 +300,12 @@ function runSingleSimulation(
       
       if (sustainable_income >= inflationAdjustedTarget && !retirement_year) {
         retirement_year = year
+        hasRetiredAlready = true // Stop super contributions from this point
       }
     } else if (scenario.mode === 'target_date') {
       if (year === targetDate) {
         final_income = sustainable_income
+        hasRetiredAlready = true // Stop super contributions from this point
       }
     }
 

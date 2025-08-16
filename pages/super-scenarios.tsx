@@ -22,13 +22,212 @@ interface SuperScenario {
   is_active: boolean
   created_at: string
   lumpsum_events: LumpsumEvent[]
+  retirement_strategy: 'wait_for_both' | 'early_retirement_first' | 'bridge_strategy' | 'inheritance_bridge'
+  bridge_years_other_income: number
+}
+
+function ScenarioEditForm({ 
+  formData, 
+  setFormData, 
+  handleSubmit, 
+  resetForm, 
+  addLumpsumEvent, 
+  removeLumpsumEvent, 
+  updateLumpsumEvent 
+}: {
+  formData: any
+  setFormData: any
+  handleSubmit: any
+  resetForm: any
+  addLumpsumEvent: any
+  removeLumpsumEvent: any
+  updateLumpsumEvent: any
+}) {
+  return (
+    <div className="bg-gray-50 rounded-lg mt-4">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold">Edit Scenario</h3>
+      </div>
+      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, name: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <input
+              type="text"
+              value={formData.description}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Mode</label>
+          <select
+            value={formData.mode}
+            onChange={(e) => setFormData((prev: any) => ({ ...prev, mode: e.target.value as 'target_income' | 'target_date' }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="target_income">Target Income → Find Retirement Date</option>
+            <option value="target_date">Target Date → Find Sustainable Income</option>
+          </select>
+        </div>
+
+        {formData.mode === 'target_income' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target Annual Income</label>
+            <input
+              type="number"
+              min="10000"
+              step="1"
+              value={formData.target_annual_income}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, target_annual_income: Number(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        )}
+
+        {formData.mode === 'target_date' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target Retirement Date</label>
+            <input
+              type="date"
+              value={formData.target_retirement_date}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, target_retirement_date: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        )}
+
+        {/* Lump Sum Events */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-md font-medium">Inheritance Events</h4>
+            <button
+              type="button"
+              onClick={addLumpsumEvent}
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+            >
+              + Add Event
+            </button>
+          </div>
+          
+          {formData.lumpsum_events.map((event: any, index: number) => (
+            <div key={index} className="bg-white p-4 rounded-lg mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
+                  <input
+                    type="text"
+                    value={event.name}
+                    onChange={(e) => updateLumpsumEvent(index, 'name', e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                  <input
+                    type="number"
+                    min="1000"
+                    step="1"
+                    value={event.amount}
+                    onChange={(e) => updateLumpsumEvent(index, 'amount', Number(e.target.value))}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
+                  <input
+                    type="date"
+                    value={event.event_date}
+                    onChange={(e) => updateLumpsumEvent(index, 'event_date', e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Allocation Strategy</label>
+                  <select
+                    value={event.allocation_strategy}
+                    onChange={(e) => updateLumpsumEvent(index, 'allocation_strategy', e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                    <option value="super">Super Contribution</option>
+                    <option value="mortgage_payoff">Mortgage Payoff</option>
+                    <option value="taxable_investment">Taxable Investment</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Person 1 Split (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={event.person1_split}
+                    onChange={(e) => {
+                      const person1 = Number(e.target.value)
+                      updateLumpsumEvent(index, 'person1_split', person1)
+                      updateLumpsumEvent(index, 'person2_split', 100 - person1)
+                    }}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => removeLumpsumEvent(index)}
+                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={resetForm}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Update Scenario
+          </button>
+        </div>
+      </form>
+    </div>
+  )
 }
 
 export default function SuperScenarios() {
   const [scenarios, setScenarios] = useState<SuperScenario[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingScenario, setEditingScenario] = useState<SuperScenario | null>(null)
+  const [showNewForm, setShowNewForm] = useState(false)
+  const [editingScenarioId, setEditingScenarioId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
 
   const [formData, setFormData] = useState({
@@ -66,9 +265,9 @@ export default function SuperScenarios() {
     e.preventDefault()
     
     try {
-      const method = editingScenario ? 'PUT' : 'POST'
-      const url = editingScenario 
-        ? `/api/super/scenarios?id=${editingScenario.id}` 
+      const method = editingScenarioId ? 'PUT' : 'POST'
+      const url = editingScenarioId 
+        ? `/api/super/scenarios?id=${editingScenarioId}` 
         : '/api/super/scenarios'
 
       const response = await fetch(url, {
@@ -80,7 +279,7 @@ export default function SuperScenarios() {
       const result = await response.json()
       
       if (result.success) {
-        setMessage(`✅ Scenario ${editingScenario ? 'updated' : 'created'} successfully!`)
+        setMessage(`✅ Scenario ${editingScenarioId ? 'updated' : 'created'} successfully!`)
         resetForm()
         fetchScenarios()
         setTimeout(() => setMessage(''), 3000)
@@ -94,17 +293,24 @@ export default function SuperScenarios() {
   }
 
   const handleEdit = (scenario: SuperScenario) => {
-    setEditingScenario(scenario)
-    setFormData({
-      name: scenario.name,
-      description: scenario.description || '',
-      mode: scenario.mode,
-      target_annual_income: scenario.target_annual_income || 80000,
-      target_retirement_date: scenario.target_retirement_date || '2050-01-01',
-      monte_carlo_runs: scenario.monte_carlo_runs,
-      lumpsum_events: scenario.lumpsum_events || []
-    })
-    setShowForm(true)
+    if (editingScenarioId === scenario.id) {
+      // If already editing this scenario, close the form
+      setEditingScenarioId(null)
+      resetForm()
+    } else {
+      // Open edit form for this scenario
+      setEditingScenarioId(scenario.id)
+      setFormData({
+        name: scenario.name,
+        description: scenario.description || '',
+        mode: scenario.mode,
+        target_annual_income: scenario.target_annual_income || 80000,
+        target_retirement_date: scenario.target_retirement_date || '2050-01-01',
+        monte_carlo_runs: scenario.monte_carlo_runs,
+        lumpsum_events: scenario.lumpsum_events || []
+      })
+      setShowNewForm(false) // Close new form if open
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -140,8 +346,8 @@ export default function SuperScenarios() {
       monte_carlo_runs: 1000,
       lumpsum_events: []
     })
-    setEditingScenario(null)
-    setShowForm(false)
+    setEditingScenarioId(null)
+    setShowNewForm(false)
   }
 
   const addLumpsumEvent = () => {
@@ -214,10 +420,14 @@ export default function SuperScenarios() {
                 AI Strategy Compare
               </Link>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  setShowNewForm(!showNewForm)
+                  setEditingScenarioId(null)
+                  if (!showNewForm) resetForm()
+                }}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                {showForm ? 'Cancel' : '+ New Scenario'}
+                {showNewForm ? 'Cancel' : '+ New Scenario'}
               </button>
             </div>
           </div>
@@ -231,12 +441,10 @@ export default function SuperScenarios() {
           </div>
         )}
 
-        {showForm && (
+        {showNewForm && (
           <div className="bg-white rounded-lg shadow mb-8">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">
-                {editingScenario ? 'Edit Scenario' : 'Create New Scenario'}
-              </h2>
+              <h2 className="text-xl font-semibold">Create New Scenario</h2>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -405,7 +613,7 @@ export default function SuperScenarios() {
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  {editingScenario ? 'Update Scenario' : 'Create Scenario'}
+                  Create Scenario
                 </button>
               </div>
             </form>
@@ -482,6 +690,19 @@ export default function SuperScenarios() {
                   </div>
                 </div>
               </div>
+              
+              {/* Edit Form - appears underneath when editing this scenario */}
+              {editingScenarioId === scenario.id && (
+                <ScenarioEditForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  handleSubmit={handleSubmit}
+                  resetForm={resetForm}
+                  addLumpsumEvent={addLumpsumEvent}
+                  removeLumpsumEvent={removeLumpsumEvent}
+                  updateLumpsumEvent={updateLumpsumEvent}
+                />
+              )}
             </div>
           ))}
           
@@ -490,7 +711,7 @@ export default function SuperScenarios() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Scenarios Yet</h3>
               <p className="text-gray-600 mb-4">Create your first scenario to start modeling retirement strategies</p>
               <button
-                onClick={() => setShowForm(true)}
+                onClick={() => setShowNewForm(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               >
                 Create First Scenario

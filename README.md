@@ -46,7 +46,8 @@ Super Planner is a focused financial planning tool that uses Monte Carlo simulat
 baseline_settings (
   person1_name, person1_current_balance, person1_annual_contribution, person1_age,
   person2_name, person2_current_balance, person2_annual_contribution, person2_age,
-  expected_return_mean, expected_return_volatility, safe_withdrawal_rate
+  expected_return_mean, expected_return_volatility, safe_withdrawal_rate,
+  retirement_strategy, early_retirement_withdrawal_rate, bridge_years_other_income
 )
 
 -- Scenario definitions
@@ -106,9 +107,11 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 ## 📱 Application Flow
 
 ### 1. Baseline Configuration (`/super-baseline`)
-- Configure couple's current super balances
-- Set annual contribution amounts and ages
+- Configure couple's current super balances and ages
+- Set annual contribution amounts (stop when retiring)
 - Define investment assumptions (expected return, volatility, withdrawal rate)
+- **NEW**: Choose retirement strategy for handling different preservation ages
+- **NEW**: Timeline display showing super access vs retirement dates
 - Real-time summary calculations and validation
 
 ### 2. Scenario Management (`/super-scenarios`)
@@ -118,7 +121,9 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 - Edit and delete scenarios with full CRUD operations
 
 ### 3. Monte Carlo Projections (`/super-projection?scenario={id}`)
-- Run 1000+ Monte Carlo simulations
+- Run 1000+ Monte Carlo simulations with retirement strategy modeling
+- **NEW**: Realistic modeling of when work stops vs super access begins
+- **NEW**: Smart contribution handling - stops when retiring, not just at 60
 - View interactive charts with confidence intervals
 - Toggle between balance and income projections
 - Analyze success rates and risk metrics
@@ -132,8 +137,8 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 ## 🔧 API Endpoints
 
 ### Baseline Settings
-- `GET /api/super/baseline-settings` - Retrieve couple's baseline data
-- `POST /api/super/baseline-settings` - Update baseline settings
+- `GET /api/super/baseline-settings` - Retrieve couple's baseline data including retirement strategy
+- `POST /api/super/baseline-settings` - Update baseline settings with retirement strategy options
 
 ### Scenarios
 - `GET /api/super/scenarios` - List all scenarios with inheritance events
@@ -247,7 +252,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Healthcare**: Medicare vs private health considerations
 - **Age Pension**: Means testing and integration strategies
 
-## 🔧 Recent Fixes
+## 🔧 Recent Features & Fixes
+
+### 🆕 Dual Retirement Strategy System
+- **NEW**: Four comprehensive retirement strategies for couples with different preservation ages
+- **NEW**: Distinction between "retirement" (stopping work) and "super access" (preservation age 60)
+- **NEW**: Inheritance Bridge strategy - use lump sums as living expenses instead of super contributions
+- **NEW**: Smart super contribution handling - contributions stop when retiring, not just at preservation age
+
+#### Retirement Strategies Available:
+1. **Wait for Both Partners** - Conservative approach waiting until both can access super
+2. **Early Retirement - First Person** - Retire when first person reaches 60, higher withdrawal rate
+3. **Bridge Strategy - External Income** - Use other income sources during gap period
+4. **Inheritance Bridge - Live Off Lump Sum** - Use inheritance as living expenses instead of super
+
+### Combined Balance Display Fix
+- **Fixed**: Combined super balance calculation showing correct sum instead of string concatenation
+- **Impact**: $116,000 + $96,000 = $212,000 (not $11600096000)
+
+### Scenario Edit UX Improvement
+- **Fixed**: Edit forms now expand underneath each scenario instead of at top of page
+- **Impact**: Better user experience when editing multiple scenarios
 
 ### Input Precision
 - **Fixed**: Changed input step values from 1000 to 1 for precise dollar amounts
@@ -266,6 +291,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Expected Return**: 0-20% per year
 - **Volatility**: 0-50% per year
 - **Withdrawal Rate**: 0.1-10% per year
+- **Early Retirement Withdrawal Rate**: 3.0-8.0% per year
 
 ## 📞 Support
 
