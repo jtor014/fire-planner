@@ -6,7 +6,7 @@ interface LumpsumEvent {
   name: string
   amount: number
   event_date: string
-  allocation_strategy: 'super' | 'mortgage_payoff' | 'taxable_investment'
+  allocation_strategy: 'super' | 'mortgage_payoff' | 'taxable_investment' | 'gap_funding'
   person1_split: number
   person2_split: number
 }
@@ -22,8 +22,15 @@ interface SuperScenario {
   is_active: boolean
   created_at: string
   lumpsum_events: LumpsumEvent[]
+  // Legacy retirement strategy (kept for backward compatibility)
   retirement_strategy: 'wait_for_both' | 'early_retirement_first' | 'bridge_strategy' | 'inheritance_bridge'
   bridge_years_other_income: number
+  // New enhanced retirement planning
+  person1_stop_work_year?: number
+  person2_stop_work_year?: number
+  gap_funding_strategy: 'none' | 'lump_sum' | 'part_time_income' | 'spousal_support' | 'taxable_investment'
+  gap_funding_amount: number
+  super_access_strategy: 'conservative' | 'aggressive' | 'custom'
 }
 
 function ScenarioEditForm({ 
@@ -33,7 +40,11 @@ function ScenarioEditForm({
   resetForm, 
   addLumpsumEvent, 
   removeLumpsumEvent, 
-  updateLumpsumEvent 
+  updateLumpsumEvent,
+  baselineSettings,
+  generateYearOptions,
+  calculateAgeInYear,
+  checkGapFundingNeeded
 }: {
   formData: any
   setFormData: any
@@ -42,6 +53,10 @@ function ScenarioEditForm({
   addLumpsumEvent: any
   removeLumpsumEvent: any
   updateLumpsumEvent: any
+  baselineSettings: any
+  generateYearOptions: () => number[]
+  calculateAgeInYear: (personAge: number, targetYear: number) => number
+  checkGapFundingNeeded: () => boolean
 }) {
   return (
     <div className="bg-gray-50 rounded-lg mt-4">
@@ -112,10 +127,107 @@ function ScenarioEditForm({
           </div>
         )}
 
+        {/* Enhanced Retirement Planning */}
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h4 className="text-md font-medium mb-3 text-blue-900">🎯 Retirement Planning</h4>
+          
+          {/* Work Cessation Planning */}
+          <div className="mb-4">
+            <h5 className="font-medium text-gray-900 mb-2">👥 When Each Person Stops Working</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {baselineSettings?.person1_name || 'Person 1'} Stops Working
+                </label>
+                <select
+                  value={formData.person1_stop_work_year}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, person1_stop_work_year: Number(e.target.value) }))}
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                >
+                  {generateYearOptions().map(year => (
+                    <option key={year} value={year}>
+                      {year} (age {baselineSettings ? calculateAgeInYear(baselineSettings.person1_age, year) : '?'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {baselineSettings?.person2_name || 'Person 2'} Stops Working
+                </label>
+                <select
+                  value={formData.person2_stop_work_year}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, person2_stop_work_year: Number(e.target.value) }))}
+                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                >
+                  {generateYearOptions().map(year => (
+                    <option key={year} value={year}>
+                      {year} (age {baselineSettings ? calculateAgeInYear(baselineSettings.person2_age, year) : '?'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Gap Funding (only show if needed) */}
+          {checkGapFundingNeeded() && (
+            <div className="mb-4 bg-yellow-50 p-3 rounded border border-yellow-200">
+              <h5 className="font-medium text-yellow-800 mb-2">🌉 Gap Funding Required</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gap Funding Strategy</label>
+                  <select
+                    value={formData.gap_funding_strategy}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, gap_funding_strategy: e.target.value as any }))}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                    <option value="none">No specific strategy</option>
+                    <option value="lump_sum">Use lump sum events</option>
+                    <option value="part_time_income">Part-time work income</option>
+                    <option value="spousal_support">Spousal super support</option>
+                    <option value="taxable_investment">Taxable investments</option>
+                  </select>
+                </div>
+                
+                {(formData.gap_funding_strategy === 'part_time_income' || formData.gap_funding_strategy === 'taxable_investment') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Annual Gap Funding Amount</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      value={formData.gap_funding_amount}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, gap_funding_amount: Number(e.target.value) }))}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      placeholder="50000"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Super Access Strategy */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">🎯 Super Access Strategy (from age 60)</label>
+            <select
+              value={formData.super_access_strategy}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, super_access_strategy: e.target.value as any }))}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            >
+              <option value="conservative">Conservative - Wait for both partners to reach 60</option>
+              <option value="aggressive">Aggressive - Start when first partner reaches 60</option>
+              <option value="custom">Custom - Use simulation to optimize</option>
+            </select>
+          </div>
+        </div>
+
         {/* Lump Sum Events */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h4 className="text-md font-medium">Inheritance Events</h4>
+            <h4 className="text-md font-medium">Lump Sum Events</h4>
             <button
               type="button"
               onClick={addLumpsumEvent}
@@ -139,15 +251,16 @@ function ScenarioEditForm({
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount (+income/-expense)</label>
                   <input
                     type="number"
-                    min="1000"
-                    step="1"
+                    step="1000"
                     value={event.amount}
                     onChange={(e) => updateLumpsumEvent(index, 'amount', Number(e.target.value))}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    placeholder="200000 or -50000"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Positive = income/inheritance, Negative = expense</p>
                 </div>
                 
                 <div>
@@ -161,16 +274,25 @@ function ScenarioEditForm({
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Allocation Strategy</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Impact Area</label>
                   <select
                     value={event.allocation_strategy}
                     onChange={(e) => updateLumpsumEvent(index, 'allocation_strategy', e.target.value)}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   >
-                    <option value="super">Super Contribution</option>
-                    <option value="mortgage_payoff">Mortgage Payoff</option>
+                    <option value="super">Super Account</option>
+                    <option value="mortgage_payoff">Mortgage/Debt</option>
                     <option value="taxable_investment">Taxable Investment</option>
+                    {checkGapFundingNeeded() && (
+                      <option value="gap_funding">🌉 Gap Funding (Retirement Bridge)</option>
+                    )}
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {checkGapFundingNeeded() && event.allocation_strategy === 'gap_funding' 
+                      ? '🌉 This lump sum will be used to fund living expenses during gap years (before super access)'
+                      : 'Where this event impacts your finances'
+                    }
+                  </p>
                 </div>
                 
                 <div>
@@ -229,6 +351,7 @@ export default function SuperScenarios() {
   const [showNewForm, setShowNewForm] = useState(false)
   const [editingScenarioId, setEditingScenarioId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
+  const [baselineSettings, setBaselineSettings] = useState<any>(null)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -237,12 +360,36 @@ export default function SuperScenarios() {
     target_annual_income: 80000,
     target_retirement_date: '2050-01-01',
     monte_carlo_runs: 1000,
-    lumpsum_events: [] as LumpsumEvent[]
+    lumpsum_events: [] as LumpsumEvent[],
+    // Legacy fields (kept for backward compatibility)
+    retirement_strategy: 'wait_for_both' as 'wait_for_both' | 'early_retirement_first' | 'bridge_strategy' | 'inheritance_bridge',
+    bridge_years_other_income: 0,
+    // New enhanced retirement planning
+    person1_stop_work_year: new Date().getFullYear() + 10,
+    person2_stop_work_year: new Date().getFullYear() + 10,
+    gap_funding_strategy: 'none' as 'none' | 'lump_sum' | 'part_time_income' | 'spousal_support' | 'taxable_investment',
+    gap_funding_amount: 0,
+    super_access_strategy: 'conservative' as 'conservative' | 'aggressive' | 'custom'
   })
 
   useEffect(() => {
     fetchScenarios()
+    fetchBaselineSettings()
   }, [])
+
+  const fetchBaselineSettings = async () => {
+    try {
+      const response = await fetch('/api/super/baseline-settings')
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          setBaselineSettings(result.data)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch baseline settings:', error)
+    }
+  }
 
   const fetchScenarios = async () => {
     try {
@@ -261,8 +408,32 @@ export default function SuperScenarios() {
     }
   }
 
+  // Helper function to detect conflicts between target dates and work cessation
+  const detectRetirementConflict = (data: any) => {
+    if (data.mode === 'target_date' && data.target_retirement_date && 
+        data.person1_stop_work_year && data.person2_stop_work_year) {
+      const targetYear = new Date(data.target_retirement_date).getFullYear()
+      const lastWorkYear = Math.max(data.person1_stop_work_year, data.person2_stop_work_year)
+      
+      if (targetYear !== lastWorkYear) {
+        return {
+          hasConflict: true,
+          message: `⚠️ Target retirement (${targetYear}) differs from when work stops (${lastWorkYear}). Work cessation will take priority.`
+        }
+      }
+    }
+    return { hasConflict: false, message: '' }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check for retirement logic conflicts
+    const conflict = detectRetirementConflict(formData)
+    if (conflict.hasConflict) {
+      setMessage(conflict.message)
+      setTimeout(() => setMessage(''), 5000)
+    }
     
     try {
       const method = editingScenarioId ? 'PUT' : 'POST'
@@ -280,7 +451,12 @@ export default function SuperScenarios() {
       
       if (result.success) {
         setMessage(`✅ Scenario ${editingScenarioId ? 'updated' : 'created'} successfully!`)
-        resetForm()
+        
+        // Only reset form when creating new scenario, not when editing existing one
+        if (!editingScenarioId) {
+          resetForm()
+        }
+        
         fetchScenarios()
         setTimeout(() => setMessage(''), 3000)
       } else {
@@ -307,9 +483,29 @@ export default function SuperScenarios() {
         target_annual_income: scenario.target_annual_income || 80000,
         target_retirement_date: scenario.target_retirement_date || '2050-01-01',
         monte_carlo_runs: scenario.monte_carlo_runs,
-        lumpsum_events: scenario.lumpsum_events || []
+        lumpsum_events: scenario.lumpsum_events || [],
+        // Legacy fields
+        retirement_strategy: scenario.retirement_strategy || 'wait_for_both',
+        bridge_years_other_income: scenario.bridge_years_other_income || 0,
+        // New enhanced retirement planning
+        person1_stop_work_year: scenario.person1_stop_work_year || new Date().getFullYear() + 10,
+        person2_stop_work_year: scenario.person2_stop_work_year || new Date().getFullYear() + 10,
+        gap_funding_strategy: scenario.gap_funding_strategy || 'none',
+        gap_funding_amount: scenario.gap_funding_amount || 0,
+        super_access_strategy: scenario.super_access_strategy || 'conservative'
       })
       setShowNewForm(false) // Close new form if open
+      
+      // Scroll to the edit form after it renders
+      setTimeout(() => {
+        const editFormElement = document.getElementById(`scenario-${scenario.id}`)
+        if (editFormElement) {
+          editFormElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start'
+          })
+        }
+      }, 100)
     }
   }
 
@@ -344,10 +540,44 @@ export default function SuperScenarios() {
       target_annual_income: 80000,
       target_retirement_date: '2050-01-01',
       monte_carlo_runs: 1000,
-      lumpsum_events: []
+      lumpsum_events: [],
+      // Legacy fields
+      retirement_strategy: 'wait_for_both',
+      bridge_years_other_income: 0,
+      // New enhanced retirement planning
+      person1_stop_work_year: new Date().getFullYear() + 10,
+      person2_stop_work_year: new Date().getFullYear() + 10,
+      gap_funding_strategy: 'none',
+      gap_funding_amount: 0,
+      super_access_strategy: 'conservative'
     })
     setEditingScenarioId(null)
     setShowNewForm(false)
+  }
+
+  // Helper functions for retirement planning
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+    for (let year = currentYear; year <= currentYear + 50; year++) {
+      years.push(year)
+    }
+    return years
+  }
+
+  const calculateAgeInYear = (personAge: number, targetYear: number) => {
+    const currentYear = new Date().getFullYear()
+    return personAge + (targetYear - currentYear)
+  }
+
+  const checkGapFundingNeeded = () => {
+    if (!baselineSettings) return false
+    
+    const person1Age60Year = new Date().getFullYear() + (60 - baselineSettings.person1_age)
+    const person2Age60Year = new Date().getFullYear() + (60 - baselineSettings.person2_age)
+    
+    return formData.person1_stop_work_year < person1Age60Year || 
+           formData.person2_stop_work_year < person2Age60Year
   }
 
   const addLumpsumEvent = () => {
@@ -356,7 +586,7 @@ export default function SuperScenarios() {
       lumpsum_events: [
         ...prev.lumpsum_events,
         {
-          name: 'Inheritance Event',
+          name: 'Lump Sum Event',
           amount: 200000,
           event_date: '2030-01-01',
           allocation_strategy: 'super',
@@ -404,7 +634,7 @@ export default function SuperScenarios() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Super Scenarios</h1>
-              <p className="text-gray-600 mt-2">Model different retirement strategies and inheritance events</p>
+              <p className="text-gray-600 mt-2">Model different retirement strategies and lump sum events</p>
             </div>
             <div className="flex space-x-4">
               <Link
@@ -510,10 +740,117 @@ export default function SuperScenarios() {
                 </div>
               )}
 
+              {/* Enhanced Retirement Planning */}
+              <div className="bg-blue-50 p-6 rounded-lg">
+                <h3 className="text-lg font-medium mb-4 text-blue-900">🎯 Retirement Planning</h3>
+                
+                {/* Work Cessation Planning */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3">👥 When Each Person Stops Working</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {baselineSettings?.person1_name || 'Person 1'} Stops Working
+                      </label>
+                      <select
+                        value={formData.person1_stop_work_year}
+                        onChange={(e) => setFormData(prev => ({ ...prev, person1_stop_work_year: Number(e.target.value) }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {generateYearOptions().map(year => (
+                          <option key={year} value={year}>
+                            {year} (age {baselineSettings ? calculateAgeInYear(baselineSettings.person1_age, year) : '?'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {baselineSettings?.person2_name || 'Person 2'} Stops Working
+                      </label>
+                      <select
+                        value={formData.person2_stop_work_year}
+                        onChange={(e) => setFormData(prev => ({ ...prev, person2_stop_work_year: Number(e.target.value) }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {generateYearOptions().map(year => (
+                          <option key={year} value={year}>
+                            {year} (age {baselineSettings ? calculateAgeInYear(baselineSettings.person2_age, year) : '?'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">📋 Super contributions automatically stop when each person stops working</p>
+                </div>
+
+                {/* Gap Funding (only show if needed) */}
+                {checkGapFundingNeeded() && (
+                  <div className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <h4 className="font-medium text-yellow-800 mb-3">🌉 Gap Funding Required</h4>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      One or both people will retire before age 60 (super preservation age). You need funding for the gap years.
+                    </p>
+                    <p className="text-xs text-blue-600 mb-3">
+                      💡 Tip: Set lump sum events (inheritance, asset sales, etc.) to "Gap Funding" allocation to automatically fund these years.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Gap Funding Strategy</label>
+                        <select
+                          value={formData.gap_funding_strategy}
+                          onChange={(e) => setFormData(prev => ({ ...prev, gap_funding_strategy: e.target.value as any }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="none">No specific strategy</option>
+                          <option value="lump_sum">Use lump sum events</option>
+                          <option value="part_time_income">Part-time work income</option>
+                          <option value="spousal_support">Spousal super support</option>
+                          <option value="taxable_investment">Taxable investments</option>
+                        </select>
+                      </div>
+                      
+                      {(formData.gap_funding_strategy === 'part_time_income' || formData.gap_funding_strategy === 'taxable_investment') && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Annual Gap Funding Amount</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="1000"
+                            value={formData.gap_funding_amount}
+                            onChange={(e) => setFormData(prev => ({ ...prev, gap_funding_amount: Number(e.target.value) }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="50000"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Annual income during gap years</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Super Access Strategy */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">🎯 Super Access Strategy (from age 60)</h4>
+                  <select
+                    value={formData.super_access_strategy}
+                    onChange={(e) => setFormData(prev => ({ ...prev, super_access_strategy: e.target.value as any }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="conservative">Conservative - Wait for both partners to reach 60</option>
+                    <option value="aggressive">Aggressive - Start when first partner reaches 60</option>
+                    <option value="custom">Custom - Use simulation to optimize</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">🔒 Super can only be accessed from preservation age (60) regardless of work cessation</p>
+                </div>
+              </div>
+
               {/* Lump Sum Events */}
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">Inheritance Events</h3>
+                  <h3 className="text-lg font-medium">Lump Sum Events</h3>
                   <button
                     type="button"
                     onClick={addLumpsumEvent}
@@ -537,15 +874,16 @@ export default function SuperScenarios() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Amount (+income/-expense)</label>
                         <input
                           type="number"
-                          min="1000"
-                          step="1"
+                          step="1000"
                           value={event.amount}
                           onChange={(e) => updateLumpsumEvent(index, 'amount', Number(e.target.value))}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="200000 or -50000"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Positive = income/inheritance, Negative = expense</p>
                       </div>
                       
                       <div>
@@ -559,16 +897,25 @@ export default function SuperScenarios() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Allocation Strategy</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Impact Area</label>
                         <select
                           value={event.allocation_strategy}
                           onChange={(e) => updateLumpsumEvent(index, 'allocation_strategy', e.target.value)}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                         >
-                          <option value="super">Super Contribution</option>
-                          <option value="mortgage_payoff">Mortgage Payoff</option>
+                          <option value="super">Super Account</option>
+                          <option value="mortgage_payoff">Mortgage/Debt</option>
                           <option value="taxable_investment">Taxable Investment</option>
+                          {checkGapFundingNeeded() && (
+                            <option value="gap_funding">🌉 Gap Funding (Retirement Bridge)</option>
+                          )}
                         </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {checkGapFundingNeeded() && event.allocation_strategy === 'gap_funding' 
+                            ? '🌉 This lump sum will be used to fund living expenses during gap years (before super access)'
+                            : 'Where this event impacts your finances'
+                          }
+                        </p>
                       </div>
                       
                       <div>
@@ -623,7 +970,7 @@ export default function SuperScenarios() {
         {/* Scenarios List */}
         <div className="space-y-6">
           {scenarios.map((scenario) => (
-            <div key={scenario.id} className="bg-white rounded-lg shadow">
+            <div key={scenario.id} id={`scenario-${scenario.id}`} className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-start">
                   <div>
@@ -665,13 +1012,13 @@ export default function SuperScenarios() {
                   </div>
                   
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Inheritance Events</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">Lump Sum Events</h4>
                     <p className="text-sm text-gray-600">
                       {scenario.lumpsum_events?.length || 0} events configured
                     </p>
                     {scenario.lumpsum_events?.map((event, i) => (
                       <p key={i} className="text-xs text-gray-500">
-                        ${event.amount.toLocaleString()} in {new Date(event.event_date).getFullYear()}
+                        {event.amount >= 0 ? '+' : ''}${event.amount.toLocaleString()} in {new Date(event.event_date).getFullYear()}
                       </p>
                     ))}
                   </div>
@@ -701,6 +1048,10 @@ export default function SuperScenarios() {
                   addLumpsumEvent={addLumpsumEvent}
                   removeLumpsumEvent={removeLumpsumEvent}
                   updateLumpsumEvent={updateLumpsumEvent}
+                  baselineSettings={baselineSettings}
+                  generateYearOptions={generateYearOptions}
+                  calculateAgeInYear={calculateAgeInYear}
+                  checkGapFundingNeeded={checkGapFundingNeeded}
                 />
               )}
             </div>
@@ -709,7 +1060,7 @@ export default function SuperScenarios() {
           {scenarios.length === 0 && (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Scenarios Yet</h3>
-              <p className="text-gray-600 mb-4">Create your first scenario to start modeling retirement strategies</p>
+              <p className="text-gray-600 mb-4">Create your first scenario to start modeling retirement strategies and lump sum events</p>
               <button
                 onClick={() => setShowNewForm(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"

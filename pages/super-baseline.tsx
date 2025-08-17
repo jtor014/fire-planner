@@ -15,6 +15,8 @@ interface BaselineSettings {
   expected_return_volatility: number
   safe_withdrawal_rate: number
   inflation_rate: number
+  longevity_risk_tolerance: 'conservative' | 'moderate' | 'aggressive' | 'spend_to_zero'
+  planning_age: number
 }
 
 export default function SuperBaseline() {
@@ -31,7 +33,9 @@ export default function SuperBaseline() {
     expected_return_mean: 7.5,
     expected_return_volatility: 15.0,
     safe_withdrawal_rate: 3.5,
-    inflation_rate: 2.5
+    inflation_rate: 2.5,
+    longevity_risk_tolerance: 'moderate',
+    planning_age: 95
   })
   
   const [loading, setLoading] = useState(true)
@@ -362,7 +366,66 @@ export default function SuperBaseline() {
               All scenarios will use this baseline for projections
             </div>
             
-            <div className="flex space-x-4">
+            {/* Longevity Risk Tolerance */}
+          <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+            <h3 className="text-lg font-medium mb-4 text-red-900">⚰️ Longevity Risk Tolerance</h3>
+            <p className="text-sm text-red-700 mb-4">
+              <strong>One of the most important settings:</strong> How prepared are you to run out of money if you live beyond current life expectancy in Australia (~85 years)?
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Risk Tolerance</label>
+                <select
+                  value={settings.longevity_risk_tolerance}
+                  onChange={(e) => handleInputChange('longevity_risk_tolerance', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="conservative">🛡️ Conservative - Plan to age 100+ (leave large buffer)</option>
+                  <option value="moderate">⚖️ Moderate - Plan to age 95 (standard approach)</option>
+                  <option value="aggressive">🎯 Aggressive - Plan to age 90 (higher withdrawal rates)</option>
+                  <option value="spend_to_zero">💰 Spend-to-Zero - Exhaust super by life expectancy</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Affects withdrawal rates and portfolio allocation recommendations
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Planning Age</label>
+                <input
+                  type="number"
+                  min="80"
+                  max="110"
+                  step="1"
+                  value={settings.planning_age}
+                  onChange={(e) => handleInputChange('planning_age', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Age to plan retirement funding until (affects safety margins)
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-white rounded border border-red-200">
+              <h4 className="font-medium text-gray-900 mb-2">📊 Impact on Your Plan:</h4>
+              <div className="text-xs text-gray-600 space-y-1">
+                <div>• <strong>Conservative:</strong> Lower withdrawal rates (3-3.5%), large balance left at death</div>
+                <div>• <strong>Moderate:</strong> Standard withdrawal rates (3.5-4%), some balance left at death</div>
+                <div>• <strong>Aggressive:</strong> Higher withdrawal rates (4-4.5%), modest balance left at death</div>
+                <div>• <strong>Spend-to-Zero:</strong> Dynamic rates to exhaust super by life expectancy - maximize living!</div>
+              </div>
+              <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+                <p className="text-xs text-green-700">
+                  <strong>💡 Reality Check:</strong> Most Australians die with 80%+ of their super unspent. Spend-to-Zero ensures you actually enjoy your retirement savings!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-4">
               <button
                 type="button"
                 onClick={() => router.push('/super-scenarios')}

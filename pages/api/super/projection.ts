@@ -76,11 +76,25 @@ export default async function handler(
             median_final_income: cachedResult.median_final_income,
             percentile_10_final_income: cachedResult.percentile_10_final_income,
             percentile_90_final_income: cachedResult.percentile_90_final_income,
+            success_rate: cachedResult.success_rate,
             yearly_projections: cachedResult.yearly_projections,
             distribution_data: cachedResult.distribution_data
           },
           cached: true,
-          cache_age_minutes: Math.round(cacheAge / (1000 * 60))
+          cache_age_minutes: Math.round(cacheAge / (1000 * 60)),
+          scenario: {
+            name: scenario.name,
+            mode: scenario.mode,
+            target_annual_income: scenario.target_annual_income,
+            target_retirement_date: scenario.target_retirement_date,
+            monte_carlo_runs: scenario.monte_carlo_runs
+          },
+          baseline: {
+            person1_name: baseline.person1_name,
+            person2_name: baseline.person2_name,
+            combined_balance: Number(baseline.person1_current_balance) + Number(baseline.person2_current_balance),
+            combined_contributions: Number(baseline.person1_annual_contribution) + Number(baseline.person2_annual_contribution)
+          }
         })
       }
     }
@@ -91,7 +105,16 @@ export default async function handler(
       target_annual_income: scenario.target_annual_income,
       target_retirement_date: scenario.target_retirement_date,
       monte_carlo_runs: scenario.monte_carlo_runs,
-      lumpsum_events: scenario.lumpsum_events || []
+      lumpsum_events: scenario.lumpsum_events || [],
+      // Legacy retirement strategy
+      retirement_strategy: scenario.retirement_strategy || 'wait_for_both',
+      bridge_years_other_income: scenario.bridge_years_other_income || 0,
+      // Enhanced retirement planning
+      person1_stop_work_year: scenario.person1_stop_work_year,
+      person2_stop_work_year: scenario.person2_stop_work_year,
+      gap_funding_strategy: scenario.gap_funding_strategy || 'none',
+      gap_funding_amount: scenario.gap_funding_amount || 0,
+      super_access_strategy: scenario.super_access_strategy || 'conservative'
     })
 
     // Cache the results
@@ -106,6 +129,7 @@ export default async function handler(
         median_final_income: simulationResult.median_final_income,
         percentile_10_final_income: simulationResult.percentile_10_final_income,
         percentile_90_final_income: simulationResult.percentile_90_final_income,
+        success_rate: simulationResult.success_rate,
         yearly_projections: simulationResult.yearly_projections,
         distribution_data: simulationResult.distribution_data
       }, {

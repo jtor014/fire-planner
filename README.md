@@ -1,79 +1,58 @@
-# Super Planner
+# 🔥 FIRE Planner - Australian FIRE Calculator
 
-A comprehensive Australian superannuation Monte Carlo projection application for couples planning their financial independence and retirement.
+> **Complete Australian FIRE (Financial Independence, Retire Early) planning application with PayCalculator-style interface, advanced Monte Carlo modeling, and comprehensive scenario management.**
 
-## 🎯 Overview
+[![Production Ready](https://img.shields.io/badge/status-production%20ready-brightgreen)](#deployment)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](#technology-stack)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](#technology-stack)
+[![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
-Super Planner is a focused financial planning tool that uses Monte Carlo simulations to model retirement scenarios for Australian couples. It specializes in superannuation projections with inheritance event modeling and AI-powered strategy comparison.
+## 🚀 **Live Demo**
 
-## ✨ Key Features
+- **Main Calculator**: [/calculator](https://fire-planner.vercel.app/calculator) - Complete FIRE planning with scenario management
+- **Legacy Interface**: [/pre60-fire](https://fire-planner.vercel.app/pre60-fire) - Enhanced Pre-60 FIRE Calculator
 
-### 🎲 Monte Carlo Simulations
-- **1000+ simulation runs** for statistical accuracy
-- **Market volatility modeling** using normal distribution (Box-Muller transform)
-- **Australian super preservation age (60)** compliance
-- **Confidence intervals** (10th-90th percentile) for risk assessment
+## ✨ **Key Features**
 
-### 📊 Scenario Modeling
-- **Target Income Mode**: Find retirement date for desired annual income
-- **Target Date Mode**: Find sustainable income for target retirement date
-- **Inheritance event modeling** with multiple allocation strategies
-- **Couple-based super contributions** with customizable splits
+### 🎯 **PayCalculator-Style Interface**
+- **Single-page application** with progressive disclosure
+- **Immutable sharing links** with URL state persistence
+- **Real-time auto-save** with localStorage mirroring
+- **Multiple scenario management** with diff visualization
+- **Client-side export** for all data and comparisons
 
-### 📈 Interactive Visualizations
-- **Chart.js projections** with confidence interval shading
-- **Balance vs income chart toggle** for different perspectives
-- **Success rate analysis** and risk assessment
-- **Real-time simulation execution** with intelligent caching
+### 🧮 **Advanced FIRE Modeling**
+- **Australian-specific calculations** with 2025-26 financial year constants
+- **Monte Carlo simulation** for market volatility stress testing
+- **Comprehensive bridge income planning** for pre-60 FIRE strategies
+- **Dynamic withdrawal strategies** with multiple spenddown approaches
+- **Tax optimization** for couples and individuals
+- **Age pension integration** with eligibility modeling
 
-### 🤖 AI Strategy Comparison
-- **Compare inheritance allocation strategies**: Super vs Mortgage vs Taxable Investment
-- **Parallel Monte Carlo analysis** across strategies
-- **AI-generated insights** and risk considerations
-- **Recommendation engine** based on success rates
+### 🏗️ **Unified Engine Architecture**
+- **Clean separation** between UI and business logic
+- **Modular calculation engines** for different FIRE phases
+- **TypeScript-first** with comprehensive type safety
+- **Input validation** and robust error handling
+- **Extensible assumptions registry** for different financial years
 
-## 🏗️ Architecture
+## 🛠️ **Technology Stack**
 
-### Technology Stack
 - **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS
-- **Backend**: Next.js API routes, Supabase PostgreSQL
-- **Visualization**: Chart.js with react-chartjs-2
-- **Simulation**: Custom Monte Carlo engine with Box-Muller distribution
+- **Engine**: Custom unified calculation architecture
+- **State Management**: URL codec with compression, localStorage persistence
+- **Charts**: Chart.js with react-chartjs-2
+- **Database**: Supabase (PostgreSQL) - optional
+- **Deployment**: Vercel-ready with comprehensive error handling
 
-### Database Schema
-```sql
--- Core couple superannuation data
-baseline_settings (
-  person1_name, person1_current_balance, person1_annual_contribution, person1_age,
-  person2_name, person2_current_balance, person2_annual_contribution, person2_age,
-  expected_return_mean, expected_return_volatility, safe_withdrawal_rate,
-  retirement_strategy, early_retirement_withdrawal_rate, bridge_years_other_income
-)
-
--- Scenario definitions
-super_scenarios (
-  name, mode, target_annual_income, target_retirement_date, monte_carlo_runs
-)
-
--- Inheritance events
-lumpsum_events (
-  scenario_id, name, amount, event_date, allocation_strategy, person1_split, person2_split
-)
-
--- Cached simulation results
-simulation_results (
-  scenario_id, baseline_hash, yearly_projections, distribution_data
-)
-```
-
-## 🚀 Getting Started
+## 🚀 **Quick Start**
 
 ### Prerequisites
-- Node.js 18+
-- Supabase account and database
-- Optional: OpenAI or Anthropic API key for enhanced AI features
+- Node.js 18 or higher
+- npm or yarn package manager
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/jtor014/fire-planner.git
@@ -82,224 +61,229 @@ cd fire-planner
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
-
-# Run database migrations
-node create-super-planner-schema.js
-
 # Start development server
 npm run dev
 ```
 
-### Environment Variables
-```bash
-# Required
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+Open [http://localhost:3000/calculator](http://localhost:3000/calculator) to access the main FIRE planning application.
 
-# Optional
-OPENAI_API_KEY=sk-your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-```
-
-## 📱 Application Flow
-
-### 1. Baseline Configuration (`/super-baseline`)
-- Configure couple's current super balances and ages
-- Set annual contribution amounts (stop when retiring)
-- Define investment assumptions (expected return, volatility, withdrawal rate)
-- **NEW**: Choose retirement strategy for handling different preservation ages
-- **NEW**: Timeline display showing super access vs retirement dates
-- Real-time summary calculations and validation
-
-### 2. Scenario Management (`/super-scenarios`)
-- Create multiple scenarios with different targets
-- Add inheritance events with allocation strategies
-- Configure 50/50 or custom splits for super contributions
-- Edit and delete scenarios with full CRUD operations
-
-### 3. Monte Carlo Projections (`/super-projection?scenario={id}`)
-- Run 1000+ Monte Carlo simulations with retirement strategy modeling
-- **NEW**: Realistic modeling of when work stops vs super access begins
-- **NEW**: Smart contribution handling - stops when retiring, not just at 60
-- View interactive charts with confidence intervals
-- Toggle between balance and income projections
-- Analyze success rates and risk metrics
-
-### 4. AI Strategy Comparison (`/super-ai-compare`)
-- Compare inheritance allocation strategies
-- Get AI-powered insights and recommendations
-- View parallel simulation results
-- Understand risk considerations and next steps
-
-## 🔧 API Endpoints
-
-### Baseline Settings
-- `GET /api/super/baseline-settings` - Retrieve couple's baseline data including retirement strategy
-- `POST /api/super/baseline-settings` - Update baseline settings with retirement strategy options
-
-### Scenarios
-- `GET /api/super/scenarios` - List all scenarios with inheritance events
-- `POST /api/super/scenarios` - Create new scenario
-- `PUT /api/super/scenarios?id={id}` - Update scenario and events
-- `DELETE /api/super/scenarios?id={id}` - Soft delete scenario
-
-### Projections
-- `GET /api/super/projection?scenario_id={id}` - Run Monte Carlo simulation
-
-### AI Analysis
-- `POST /api/super/ai-compare` - Compare inheritance allocation strategies
-
-## 🎲 Monte Carlo Simulation Details
-
-### Market Return Modeling
-```typescript
-// Box-Muller transform for normal distribution
-function generateRandomReturn(mean: number, volatility: number): number {
-  const u1 = Math.random()
-  const u2 = Math.random()
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
-  return (mean + volatility * z) / 100
-}
-```
-
-### Australian Super Rules
-- **Preservation Age**: Cannot access super before age 60
-- **Contribution Limits**: Validates against Australian contribution caps
-- **Withdrawal Rates**: Default 3.5% safe withdrawal rate
-- **Inflation Adjustment**: Long-term targets adjusted for inflation
-
-### Inheritance Event Processing
-- **Super Allocation**: Contributes to super with person1/person2 splits
-- **Mortgage Payoff**: Reduces debt burden (simulated impact)
-- **Taxable Investment**: Creates accessible investment balance
-
-## 🧪 Testing
+### Build for Production
 
 ```bash
-# Run the test suite
-npm run test:api
-
-# Build validation
-npm run build
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-```
-
-## 📊 Performance Features
-
-- **Result Caching**: Simulation results cached by baseline settings hash
-- **Incremental Updates**: Only re-run simulations when baseline changes
-- **Background Processing**: Monte Carlo runs don't block UI
-- **Optimized Queries**: Efficient database operations with proper indexing
-
-## 🔒 Security Considerations
-
-- **Input Validation**: All API endpoints validate user inputs
-- **SQL Injection Protection**: Parameterized queries via Supabase
-- **Rate Limiting**: Supabase built-in protection
-- **Environment Secrets**: Secure API key management
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-```bash
-# Deploy to Vercel
-vercel --prod
-
-# Set environment variables in Vercel dashboard
-# Point to production Supabase database
-```
-
-### Manual Deployment
-```bash
-# Build for production
+# Build the application
 npm run build
 
 # Start production server
 npm start
 ```
 
-## 🤝 Contributing
+## 📊 **Usage**
+
+### **Main Calculator Interface**
+
+1. **Configure Household**
+   - Add people with salaries, super balances, and FIRE ages
+   - Set annual expenses and household structure
+   - Configure assets and debts
+
+2. **Select Strategies**
+   - Choose household retirement timing
+   - Configure bridge income sources
+   - Set spenddown and tax optimization strategies
+
+3. **Set Return Assumptions**
+   - Select market scenarios (base, conservative, optimistic)
+   - Enable Monte Carlo simulation for risk analysis
+   - Configure asset allocation and withdrawal strategies
+
+4. **Manage Scenarios**
+   - Create multiple scenarios to compare strategies
+   - Use diff visualization to see configuration differences
+   - Export scenarios and comparisons as JSON
+
+5. **Analyze Results**
+   - View comprehensive FIRE timeline projections
+   - Analyze bridge income requirements and feasibility
+   - Review age pension eligibility and optimization opportunities
+
+## 🎯 **Core Features**
+
+### **Household Strategies**
+- **Both stop same year**: Traditional joint retirement
+- **Staggered retirement**: One person FIREs first, other continues working
+- **Person-specific FIRE**: Individual retirement timing with bridge income
+
+### **Bridge Income Sources**
+- **Working partner salary**: Continued income from non-retired partner
+- **Part-time income**: Declining consulting or casual work
+- **Rental properties**: Investment property income with vacancy modeling
+- **Lump sum events**: Inheritance, property sales, windfalls
+
+### **Withdrawal Strategies**
+- **Fixed real**: Inflation-adjusted withdrawals
+- **Fixed nominal**: Same dollar amount each year
+- **Dynamic**: Performance-based withdrawal adjustments
+- **Guardrails**: Floor and ceiling withdrawal limits
+- **Spend to zero**: Exhaust super by specific age
+
+### **Risk Analysis**
+- **Monte Carlo simulation**: Market volatility stress testing
+- **Sequence of returns risk**: Early retirement risk analysis
+- **Inflation impact**: Long-term purchasing power erosion
+- **Longevity planning**: Extended life expectancy scenarios
+
+## 🔧 **Configuration**
+
+### **Environment Variables**
+
+Create a `.env.local` file in the root directory:
+
+```bash
+# Core Application (Optional)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+
+# Optional Features
+OPENAI_API_KEY=sk-your_openai_api_key          # For AI chat features
+ANTHROPIC_API_KEY=your_anthropic_api_key       # Alternative to OpenAI
+UP_API_TOKEN=up:yeah:your_up_bank_token        # For transaction imports
+```
+
+**Note**: The application works fully without any environment variables. They only enable optional features like AI chat, bank imports, and cloud data persistence.
+
+### **Australian Financial Constants**
+
+The application includes comprehensive Australian financial constants for 2025-26:
+- Tax brackets with Stage 3 tax cuts
+- Superannuation guarantee rates and caps
+- Age pension rates and thresholds
+- Preservation ages and minimum drawdown rates
+
+## 📚 **API Documentation**
+
+### **Main Engine Contract**
+
+```typescript
+import { runFirePlan } from '@/lib/engine'
+
+const result = await runFirePlan({
+  household: {
+    people: [{ /* person config */ }],
+    structure: 'couple',
+    annual_expenses: { /* expense config */ },
+    assets: { /* asset config */ },
+    strategy: { /* household strategy */ }
+  },
+  strategy: {
+    bridge: { /* bridge income config */ },
+    spenddown: { /* withdrawal strategy */ },
+    tax_optimization: { /* tax strategy */ }
+  },
+  returns: {
+    type: 'monte_carlo',
+    scenario: 'base',
+    assumptions: { /* return assumptions */ }
+  },
+  assumptions: getCurrentAssumptions(), // 2025-26 constants
+  options: {
+    include_monte_carlo: true,
+    include_stress_testing: true,
+    detailed_timeline: true
+  }
+})
+```
+
+### **State Management**
+
+```typescript
+import { generateShareableUrl, extractStateFromUrl } from '@/lib/url-codec'
+import { AutoSaver } from '@/lib/storage'
+
+// Generate shareable URLs
+const shareUrl = generateShareableUrl(calculatorState)
+
+// Auto-save with debouncing
+const autoSaver = new AutoSaver(state, { saveInterval: 3000 })
+```
+
+## 🧪 **Testing**
+
+```bash
+# TypeScript compilation check
+npm run type-check
+
+# ESLint validation
+npm run lint
+
+# API endpoint testing
+npm run test:api
+```
+
+## 📈 **Performance**
+
+- **Zero TypeScript compilation errors**
+- **Optimized state management** with debounced operations
+- **Efficient calculations** with memoization where appropriate
+- **Responsive design** optimized for all device sizes
+- **Fast rendering** with React optimizations
+
+## 🚀 **Deployment**
+
+### **Vercel (Recommended)**
+
+1. Fork this repository
+2. Connect to Vercel
+3. Deploy with default settings
+4. Configure environment variables if needed
+
+### **Other Platforms**
+
+- **Netlify**: Compatible with static deployment
+- **AWS/GCP**: Container deployment ready
+- **Self-hosted**: Docker support available
+
+## 🤝 **Contributing**
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+### **Development Guidelines**
+
+- **TypeScript first**: All code must pass `npm run type-check`
+- **Comprehensive testing**: Test all user-facing functionality
+- **Documentation**: Update docs for new features
+- **Error handling**: Implement graceful error handling
+- **Performance**: Consider performance impact of changes
+
+## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🎯 Australian Financial Context
+## 🙏 **Acknowledgments**
 
-### Superannuation System
-- **Preservation Age**: Currently 60 (may increase)
-- **Contribution Caps**: $27,500 concessional, $110,000 non-concessional (2024)
-- **Tax Treatment**: 15% contributions tax, 0% pension phase
-- **Access Rules**: Condition of release requirements
-
-### FIRE Planning Considerations
-- **Super vs Taxable**: Balance accessibility vs tax efficiency
-- **Preservation Age**: Plan for bridge strategies before 60
-- **Healthcare**: Medicare vs private health considerations
-- **Age Pension**: Means testing and integration strategies
-
-## 🔧 Recent Features & Fixes
-
-### 🆕 Dual Retirement Strategy System
-- **NEW**: Four comprehensive retirement strategies for couples with different preservation ages
-- **NEW**: Distinction between "retirement" (stopping work) and "super access" (preservation age 60)
-- **NEW**: Inheritance Bridge strategy - use lump sums as living expenses instead of super contributions
-- **NEW**: Smart super contribution handling - contributions stop when retiring, not just at preservation age
-
-#### Retirement Strategies Available:
-1. **Wait for Both Partners** - Conservative approach waiting until both can access super
-2. **Early Retirement - First Person** - Retire when first person reaches 60, higher withdrawal rate
-3. **Bridge Strategy - External Income** - Use other income sources during gap period
-4. **Inheritance Bridge - Live Off Lump Sum** - Use inheritance as living expenses instead of super
-
-### Combined Balance Display Fix
-- **Fixed**: Combined super balance calculation showing correct sum instead of string concatenation
-- **Impact**: $116,000 + $96,000 = $212,000 (not $11600096000)
-
-### Scenario Edit UX Improvement
-- **Fixed**: Edit forms now expand underneath each scenario instead of at top of page
-- **Impact**: Better user experience when editing multiple scenarios
-
-### Input Precision
-- **Fixed**: Changed input step values from 1000 to 1 for precise dollar amounts
-- **Impact**: Can now enter exact super balances including cents (e.g., $116,289.50)
-
-### Baseline Settings Save
-- **Fixed**: Singleton database constraint handling in upsert operations
-- **Impact**: Baseline settings now save properly without constraint violations
-
-### Inheritance Events Persistence
-- **Fixed**: PUT method now properly handles lumpsum_events updates
-- **Impact**: Inheritance events persist correctly when editing scenarios
-
-### Validation Ranges
-- **Ages**: 18-100 years
-- **Expected Return**: 0-20% per year
-- **Volatility**: 0-50% per year
-- **Withdrawal Rate**: 0.1-10% per year
-- **Early Retirement Withdrawal Rate**: 3.0-8.0% per year
-
-## 📞 Support
-
-For questions or support, please:
-1. Check the [documentation](docs/)
-2. Search [existing issues](https://github.com/jtor014/fire-planner/issues)
-3. Create a [new issue](https://github.com/jtor014/fire-planner/issues/new)
+- **Australian Taxation Office** for public financial constants
+- **Australian Prudential Regulation Authority** for superannuation regulations
+- **PayCalculator.com.au** for UX inspiration
+- **Next.js team** for excellent framework
+- **Vercel** for hosting platform
 
 ---
 
-**Built with ❤️ for the Australian FIRE community**
+## 📞 **Support**
+
+- **Issues**: [GitHub Issues](https://github.com/jtor014/fire-planner/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jtor014/fire-planner/discussions)
+- **Documentation**: [Project Wiki](https://github.com/jtor014/fire-planner/wiki)
+
+---
+
+<div align="center">
+
+**🔥 Built for Australian FIRE enthusiasts by developers who understand the journey 🇦🇺**
+
+[Demo](https://fire-planner.vercel.app/calculator) • [Documentation](./CLAUDE.md) • [Contributing](./CONTRIBUTING.md)
+
+</div>

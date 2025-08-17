@@ -311,7 +311,7 @@ export default function SuperProjection() {
             <div className="text-sm text-gray-500">
               {scenarioInfo?.mode === 'target_income' 
                 ? `$${scenarioInfo.target_annual_income?.toLocaleString()}/year`
-                : new Date(scenarioInfo?.target_retirement_date || '').getFullYear()
+                : scenarioInfo?.target_retirement_date ? new Date(scenarioInfo.target_retirement_date).getFullYear() : 'N/A'
               }
             </div>
           </div>
@@ -319,7 +319,7 @@ export default function SuperProjection() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-600 mb-2">Success Rate</h3>
             <div className="text-2xl font-bold text-gray-900">
-              {projectionData?.success_rate.toFixed(1)}%
+              {projectionData?.success_rate?.toFixed(1) ?? 'N/A'}%
             </div>
             <div className="text-sm text-gray-500">
               {scenarioInfo?.monte_carlo_runs.toLocaleString()} simulations
@@ -342,10 +342,10 @@ export default function SuperProjection() {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-sm font-medium text-gray-600 mb-2">Sustainable Income</h3>
               <div className="text-lg font-bold text-gray-900">
-                ${projectionData.median_final_income.toLocaleString()}
+                ${projectionData?.median_final_income?.toLocaleString() ?? 'N/A'}
               </div>
               <div className="text-sm text-gray-500">
-                ${projectionData.percentile_10_final_income?.toLocaleString()} - ${projectionData.percentile_90_final_income?.toLocaleString()} (10th-90th)
+                ${projectionData?.percentile_10_final_income?.toLocaleString() ?? 'N/A'} - ${projectionData?.percentile_90_final_income?.toLocaleString() ?? 'N/A'} (10th-90th)
               </div>
             </div>
           )}
@@ -416,7 +416,7 @@ export default function SuperProjection() {
                       (projectionData?.success_rate || 0) >= 80 ? 'text-green-600' :
                       (projectionData?.success_rate || 0) >= 60 ? 'text-yellow-600' : 'text-red-600'
                     }`}>
-                      {projectionData?.success_rate.toFixed(1)}%
+                      {projectionData?.success_rate?.toFixed(1) ?? 'N/A'}%
                     </span>
                   </div>
                   <div className="text-xs text-gray-500 mt-2">

@@ -34,7 +34,9 @@ export default async function handler(
         expected_return_mean: 7.0,
         expected_return_volatility: 15.0,
         safe_withdrawal_rate: 4.0,
-        inflation_rate: 2.5
+        inflation_rate: 2.5,
+        longevity_risk_tolerance: 'moderate',
+        planning_age: 95
       }
 
       res.status(200).json({
@@ -55,7 +57,9 @@ export default async function handler(
         expected_return_mean,
         expected_return_volatility,
         safe_withdrawal_rate,
-        inflation_rate
+        inflation_rate,
+        longevity_risk_tolerance,
+        planning_age
       } = req.body
 
       // Validate required fields
@@ -79,6 +83,14 @@ export default async function handler(
         return res.status(400).json({ error: 'Withdrawal rate must be between 0% and 10%' })
       }
 
+      if (longevity_risk_tolerance && !['conservative', 'moderate', 'aggressive', 'spend_to_zero'].includes(longevity_risk_tolerance)) {
+        return res.status(400).json({ error: 'Longevity risk tolerance must be conservative, moderate, aggressive, or spend_to_zero' })
+      }
+
+      if (planning_age && (planning_age < 80 || planning_age > 110)) {
+        return res.status(400).json({ error: 'Planning age must be between 80 and 110' })
+      }
+
 
       // Check if baseline settings already exist
       const { data: existingSettings } = await supabase
@@ -99,6 +111,8 @@ export default async function handler(
         expected_return_volatility: Number(expected_return_volatility),
         safe_withdrawal_rate: Number(safe_withdrawal_rate),
         inflation_rate: Number(inflation_rate) || 2.5,
+        longevity_risk_tolerance: longevity_risk_tolerance || 'moderate',
+        planning_age: Number(planning_age) || 95,
         updated_at: new Date().toISOString()
       }
 

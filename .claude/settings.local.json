@@ -30,7 +30,9 @@
       "Bash(rm:*)",
       "Bash(curl:*)",
       "Bash(echo:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(pkill:*)",
+      "Bash(grep:*)"
     ],
     "defaultMode": "acceptEdits"
   }

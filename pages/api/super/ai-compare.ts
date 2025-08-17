@@ -76,7 +76,13 @@ export default async function handler(
           allocation_strategy: strategy.allocation as 'super' | 'mortgage_payoff' | 'taxable_investment',
           person1_split: strategy.person1_split,
           person2_split: strategy.person2_split
-        }]
+        }],
+        // Required properties for SuperScenario interface
+        retirement_strategy: 'inheritance_bridge' as const,
+        bridge_years_other_income: 0,
+        gap_funding_strategy: 'none' as const,
+        gap_funding_amount: 0,
+        super_access_strategy: 'conservative' as const
       }
 
       const simulationResult = runMonteCarloSimulation(baseline, scenario)

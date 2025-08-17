@@ -38,7 +38,15 @@ export default async function handler(
         target_annual_income,
         target_retirement_date,
         monte_carlo_runs = 1000,
-        lumpsum_events = []
+        lumpsum_events = [],
+        retirement_strategy = 'wait_for_both',
+        bridge_years_other_income = 0,
+        // New enhanced retirement planning
+        person1_stop_work_year,
+        person2_stop_work_year,
+        gap_funding_strategy = 'none',
+        gap_funding_amount = 0,
+        super_access_strategy = 'conservative'
       } = req.body
 
       // Validate required fields
@@ -58,6 +66,11 @@ export default async function handler(
         return res.status(400).json({ error: 'Target retirement date required for target_date mode' })
       }
 
+      // Validate retirement strategy
+      if (!['wait_for_both', 'early_retirement_first', 'bridge_strategy', 'inheritance_bridge'].includes(retirement_strategy)) {
+        return res.status(400).json({ error: 'Invalid retirement strategy' })
+      }
+
       // Create scenario
       const { data: scenario, error: scenarioError } = await supabase
         .from('super_scenarios')
@@ -67,7 +80,15 @@ export default async function handler(
           mode,
           target_annual_income: mode === 'target_income' ? Number(target_annual_income) : null,
           target_retirement_date: mode === 'target_date' ? target_retirement_date : null,
-          monte_carlo_runs: Number(monte_carlo_runs) || 1000
+          monte_carlo_runs: Number(monte_carlo_runs) || 1000,
+          retirement_strategy,
+          bridge_years_other_income: Number(bridge_years_other_income) || 0,
+          // New enhanced retirement planning
+          person1_stop_work_year: Number(person1_stop_work_year) || null,
+          person2_stop_work_year: Number(person2_stop_work_year) || null,
+          gap_funding_strategy,
+          gap_funding_amount: Number(gap_funding_amount) || 0,
+          super_access_strategy
         })
         .select()
         .single()
@@ -122,7 +143,15 @@ export default async function handler(
         target_retirement_date,
         monte_carlo_runs,
         is_active = true,
-        lumpsum_events = []
+        lumpsum_events = [],
+        retirement_strategy = 'wait_for_both',
+        bridge_years_other_income = 0,
+        // New enhanced retirement planning
+        person1_stop_work_year,
+        person2_stop_work_year,
+        gap_funding_strategy = 'none',
+        gap_funding_amount = 0,
+        super_access_strategy = 'conservative'
       } = req.body
 
       // Validate mode constraints
@@ -132,6 +161,11 @@ export default async function handler(
 
       if (mode === 'target_date' && !target_retirement_date) {
         return res.status(400).json({ error: 'Target retirement date required for target_date mode' })
+      }
+
+      // Validate retirement strategy
+      if (retirement_strategy && !['wait_for_both', 'early_retirement_first', 'bridge_strategy', 'inheritance_bridge'].includes(retirement_strategy)) {
+        return res.status(400).json({ error: 'Invalid retirement strategy' })
       }
 
       const { data: scenario, error } = await supabase
@@ -144,6 +178,14 @@ export default async function handler(
           target_retirement_date: mode === 'target_date' ? target_retirement_date : null,
           monte_carlo_runs: Number(monte_carlo_runs) || 1000,
           is_active,
+          retirement_strategy,
+          bridge_years_other_income: Number(bridge_years_other_income) || 0,
+          // New enhanced retirement planning
+          person1_stop_work_year: Number(person1_stop_work_year) || null,
+          person2_stop_work_year: Number(person2_stop_work_year) || null,
+          gap_funding_strategy,
+          gap_funding_amount: Number(gap_funding_amount) || 0,
+          super_access_strategy,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)

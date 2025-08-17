@@ -67,8 +67,8 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Super Planner</h1>
-          <p className="text-gray-600">Australian Superannuation Monte Carlo Projections</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">FIRE Planner</h1>
+          <p className="text-gray-600">Australian FIRE Planning with Pre-60 Bridge Strategy and Super Optimization</p>
         </div>
 
         {/* Current Status */}
@@ -113,60 +113,71 @@ export default function Home() {
           </div>
         )}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Baseline Settings</h3>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-gray-600 text-sm mb-4">Configure couple's super balances and assumptions</p>
+        {/* FIRE Calculators */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Pre-60 FIRE Calculator */}
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Pre-60 FIRE Calculator</h3>
+            <p className="text-gray-600 mb-4">Bridge strategy until super access at 60</p>
+            
             <Link 
-              href="/super-baseline"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-block w-full text-center"
+              href="/pre60-fire"
+              className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 inline-block w-full text-center"
             >
-              Configure Baseline
+              Calculate Bridge Funding
             </Link>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Manage Scenarios</h3>
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-gray-600 text-sm mb-4">Create target income/date scenarios with inheritance events</p>
+          {/* Super Spend-to-Zero Calculator */}
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Super Spend-to-Zero</h3>
+            <p className="text-gray-600 mb-4">Optimal withdrawal strategy from age 60+</p>
+            
             <Link 
-              href="/super-scenarios"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors inline-block w-full text-center"
+              href="/super-spend-zero"
+              className="bg-green-600 text-white px-4 py-2 rounded font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 inline-block w-full text-center"
             >
-              Manage Scenarios
+              Optimize Withdrawals
             </Link>
           </div>
+        </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">View Projections</h3>
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
+        {/* Legacy Tools */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Legacy Super Planning Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Baseline Settings</h3>
+              <p className="text-gray-600 text-sm mb-3">Configure couple's super balances and assumptions</p>
+              <Link 
+                href="/super-baseline"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors inline-block w-full text-center"
+              >
+                Configure Baseline
+              </Link>
             </div>
-            <p className="text-gray-600 text-sm mb-4">Run Monte Carlo simulations with confidence intervals</p>
-            <Link 
-              href="/super-scenarios"
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors inline-block w-full text-center"
-            >
-              View Scenarios
-            </Link>
+
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Manage Scenarios</h3>
+              <p className="text-gray-600 text-sm mb-3">Create complex Monte Carlo scenarios</p>
+              <Link 
+                href="/super-scenarios"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors inline-block w-full text-center"
+              >
+                Manage Scenarios
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">View Projections</h3>
+              <p className="text-gray-600 text-sm mb-3">Run Monte Carlo simulations</p>
+              <Link 
+                href="/super-scenarios"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors inline-block w-full text-center"
+              >
+                View Scenarios
+              </Link>
+            </div>
           </div>
         </div>
 
